@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>For You, With Love ♡</title>
+<meta name="description" content="A special birthday surprise made with love.">
+
+<!-- GSAP -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&family=Great+Vibes&family=Playfair+Display:wght@500;600;700&display=swap');
+
+:root{
+  --wine:#711d32;
+  --wine2:#9c304d;
+  --rose:#d9879b;
+  --cream:#f9f0e6;
+  --paper:#fffaf5;
+  --ink:#281b1c;
+  --muted:#745d60;
+  --gold:#caa36a;
+  --gold-light:#e8d5a8;
+  --shadow:0 30px 90px rgba(74,18,33,.20);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{
+  font-family:"DM Sans",sans-serif;
+  background:#ead6d1;
+  color:var(--ink);
+}
+button{font:inherit}
+.app{
+  width:100%;height:100%;position:relative;overflow:hidden;
+  background:
+    radial-gradient(circle at 15% 10%,#fff8f0 0,transparent 30%),
+    radial-gradient(circle at 90% 85%,#e7b9bd 0,transparent 30%),
+    linear-gradient(135deg,#f8eee4,#efd9d2 48%,#e5c0c2);
+}
+.app:before{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:.25;
+  background-image:radial-gradient(#6d3a42 0.6px,transparent .7px);
+  background-size:8px 8px;mix-blend-mode:multiply;
+}
+.progress{
+  position:absolute;z-index:50;top:0;left:0;height:3px;width:0;
+  background:linear-gradient(90deg,var(--wine),var(--rose),var(--gold));
+  transition:width 0.5s ease;
+}
+.grain{
+  position:absolute;inset:-50%;z-index:49;pointer-events:none;opacity:.055;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.8'/%3E%3C/svg%3E");
+  transform:rotate(7deg);
+}
+.screen{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  padding:55px 24px 90px;opacity:0;visibility:hidden;pointer-events:none;
+  will-change:opacity,transform;
+}
+.screen.active{opacity:1;visibility:visible;pointer-events:auto}
+.content{width:min(1100px,100%);position:relative;z-index:4;text-align:center}
+.serif{font-family:"Playfair Display",serif}
+.script{font-family:"Great Vibes",cursive}
+.cursive{font-family:"Cormorant Garamond",serif}
+
+.decor{
+  position:absolute;z-index:2;pointer-events:none;color:var(--wine);opacity:.4;
+}
+.decor.one{left:3%;top:13%;font-size:22px;transform:rotate(-18deg)}
+.decor.two{right:5%;top:20%;font-size:35px;transform:rotate(15deg)}
+.decor.three{left:8%;bottom:20%;font-size:28px}
+.decor.four{right:8%;bottom:17%;font-size:20px}
+
+/* floating hearts */
+.heart-field{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:1}
+.float-heart{
+  position:absolute;color:var(--wine2);font-size:16px;opacity:.18;
+  animation:floatUp linear infinite;
+}
+@keyframes floatUp{
+  from{transform:translateY(110vh) rotate(0deg);opacity:0}
+  15%{opacity:.25}85%{opacity:.18}
+  to{transform:translateY(-20vh) rotate(180deg);opacity:0}
+}
+
+/* Particle canvas */
+#particleCanvas{
+  position:absolute;inset:0;z-index:3;pointer-events:none;
+}
+
+/* shared controls */
+.nav{
+  position:absolute;z-index:60;left:50%;bottom:22px;transform:translateX(-50%);
+  display:flex;align-items:center;gap:10px;
+  transition:opacity 0.4s ease, visibility 0.4s ease;
+}
+.nav.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.nav button{
+  border:1px solid rgba(113,29,50,.22);background:rgba(255,250,245,.65);
+  color:var(--wine);padding:11px 18px;border-radius:999px;cursor:pointer;
+  backdrop-filter:blur(15px);transition:.25s;font-size:14px;
+}
+.nav button:hover:not(:disabled){background:#fff;transform:translateY(-2px);box-shadow:0 10px 25px #5c1b2c1c}
+.nav button:disabled{opacity:.25;cursor:not-allowed}
+.counter{font-size:12px;color:var(--muted);min-width:45px;text-align:center}
+.next-hint{
+  position:absolute;right:28px;bottom:31px;z-index:5;color:var(--muted);font-size:12px;
+  transition:opacity 0.4s ease;
+}
+.next-hint.hidden{opacity:0;pointer-events:none}
+
+/* ====================== */
+/* PASSCODE PAGE          */
+/* ====================== */
+.pass-layout{display:grid;grid-template-columns:330px 1fr;align-items:center;gap:80px;text-align:left}
+
+/* Premium Photo Frame */
+.premium-frame{
+  position:relative;
+  display:inline-block;
+}
+.premium-frame-inner{
+  background:linear-gradient(135deg,#fff 0%,#f9f2e8 100%);
+  padding:14px 14px 48px;
+  box-shadow:
+    0 25px 60px rgba(74,18,33,.22),
+    0 8px 20px rgba(74,18,33,.12),
+    inset 0 0 0 1px rgba(202,163,106,.25);
+  position:relative;
+  transform:rotate(-2deg);
+  transition:transform 0.4s ease;
+}
+.premium-frame-inner:hover{transform:rotate(0deg)}
+.premium-frame-border{
+  position:absolute;inset:6px;
+  border:1px solid var(--gold-light);
+  pointer-events:none;
+}
+/* Tape effect */
+.premium-frame-tape{
+  position:absolute;width:70px;height:22px;top:-10px;left:50%;
+  transform:translateX(-50%) rotate(-2deg);
+  background:linear-gradient(135deg,#ead3b5cc,#d4c0a4cc);
+  border-radius:1px;z-index:2;
+}
+/* Corner decorations */
+.premium-frame-corner{
+  position:absolute;width:18px;height:18px;
+  border-color:var(--gold);border-style:solid;
+  opacity:.6;
+}
+.premium-frame-corner.tl{top:3px;left:3px;border-width:2px 0 0 2px}
+.premium-frame-corner.tr{top:3px;right:3px;border-width:2px 2px 0 0}
+.premium-frame-corner.bl{bottom:3px;left:3px;border-width:0 0 2px 2px}
+.premium-frame-corner.br{bottom:3px;right:3px;border-width:0 2px 2px 0}
+
+.premium-frame img{display:block;width:100%;aspect-ratio:4/5;object-fit:cover}
+.frame-caption{
+  position:absolute;bottom:13px;left:0;right:0;text-align:center;
+  font-family:"Great Vibes";font-size:24px;color:#4d2c32;
+}
+
+.pass-copy h1{font:500 clamp(36px,5.5vw,62px) "Playfair Display";margin:0 0 8px;color:#351c22}
+.pass-copy p{font:18px "Cormorant Garamond";font-size:20px;color:var(--muted);margin:0 0 22px}
+.dots{display:flex;gap:12px;margin-bottom:18px}
+.dot{
+  width:14px;height:14px;border:2px solid var(--wine);border-radius:50%;
+  transition:all 0.3s cubic-bezier(.4,0,.2,1);
+}
+.dot.filled{
+  background:var(--wine);
+  box-shadow:0 0 12px rgba(113,29,50,.4);
+  transform:scale(1.15);
+}
+.keypad{display:grid;grid-template-columns:repeat(3,55px);gap:9px}
+.key{
+  width:55px;height:55px;border:1px solid #711d3230;border-radius:50%;
+  background:#fff9f4;color:var(--wine);cursor:pointer;font-weight:600;font-size:18px;
+  transition:.18s;box-shadow:0 5px 15px #5e1c2b14;
+}
+.key:hover{background:var(--wine);color:#fff;transform:translateY(-2px)}
+.key:active{transform:scale(.94)}
+.error{height:24px;color:#9d2945;font-size:13px;margin-top:10px;font-style:italic}
+
+/* ====================== */
+/* PAGE 2 - HERO          */
+/* ====================== */
+.hero-kicker{font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--wine);margin-bottom:18px}
+.hero-title{font:400 clamp(64px,12vw,140px) "Great Vibes";line-height:.88;margin:0;color:#461c27}
+.hero-name{font:600 clamp(28px,4.5vw,56px) "Playfair Display";letter-spacing:.12em;text-transform:uppercase;margin:16px 0 10px;color:#4a1e2a}
+.hero-line{width:100px;height:1px;background:var(--gold);margin:18px auto}
+
+.click-to-open{
+  display:inline-flex;align-items:center;gap:12px;
+  margin-top:28px;padding:16px 36px;
+  border:2px solid var(--wine);border-radius:999px;
+  background:transparent;color:var(--wine);cursor:pointer;
+  font:500 18px "Cormorant Garamond";letter-spacing:.08em;
+  transition:all 0.4s cubic-bezier(.4,0,.2,1);
+  position:relative;overflow:hidden;
+}
+.click-to-open::before{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(135deg,var(--wine),var(--wine2));
+  opacity:0;transition:opacity 0.4s ease;border-radius:999px;
+}
+.click-to-open:hover{
+  color:#fff;border-color:var(--wine);
+  transform:translateY(-3px);
+  box-shadow:0 15px 40px rgba(113,29,50,.25);
+}
+.click-to-open:hover::before{opacity:1}
+.click-to-open span{position:relative;z-index:1}
+.click-to-open .heart-icon{
+  position:relative;z-index:1;font-size:22px;
+  animation:pulse-heart 1.5s ease-in-out infinite;
+}
+@keyframes pulse-heart{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.2)}
+}
+
+/* ====================== */
+/* PAGE 3 - MESSAGE       */
+/* ====================== */
+.cinematic-card{
+  width:min(900px,100%);margin:auto;padding:80px 40px;border-radius:30px;
+  background:linear-gradient(135deg,#291b2a,#5a2438 60%,#3d1528);
+  color:#fff4ea;box-shadow:var(--shadow);position:relative;overflow:hidden;
+}
+.cinematic-card::before{
+  content:"";position:absolute;inset:-50%;
+  background:radial-gradient(circle,#e3a8ae1a 0 2px,transparent 3px);
+  background-size:45px 45px;transform:rotate(12deg);
+}
+.cinematic-card::after{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(ellipse at 30% 20%,rgba(202,163,106,.1),transparent 60%),
+             radial-gradient(ellipse at 80% 80%,rgba(217,135,155,.1),transparent 50%);
+  pointer-events:none;
+}
+.cinematic-message{
+  position:relative;z-index:2;
+  font:400 clamp(36px,6.5vw,68px) "Great Vibes";line-height:1.15;
+}
+.cinematic-float{
+  position:absolute;pointer-events:none;z-index:1;
+  color:#e8c6b9;opacity:.15;font-size:20px;
+}
+
+/* ====================== */
+/* PAGE 4 - PICTURE       */
+/* ====================== */
+.picture-page{display:flex;flex-direction:column;align-items:center;gap:24px}
+.luxury-frame{
+  position:relative;display:inline-block;
+  padding:18px;
+  background:linear-gradient(145deg,#fff 0%,#f5ebe0 100%);
+  box-shadow:
+    0 30px 80px rgba(74,18,33,.2),
+    0 0 0 1px rgba(202,163,106,.2),
+    inset 0 0 30px rgba(202,163,106,.08);
+  transform:rotate(-1.5deg);
+  transition:transform 0.5s cubic-bezier(.4,0,.2,1);
+  cursor:pointer;
+}
+.luxury-frame:hover{transform:rotate(0deg) scale(1.02)}
+.luxury-frame-glow{
+  position:absolute;inset:-4px;border-radius:4px;
+  background:linear-gradient(135deg,var(--gold-light),var(--rose),var(--gold));
+  opacity:.3;z-index:-1;filter:blur(8px);
+  animation:frame-glow 3s ease-in-out infinite alternate;
+}
+@keyframes frame-glow{
+  0%{opacity:.2}100%{opacity:.4}
+}
+.luxury-frame-outline{
+  position:absolute;inset:8px;
+  border:1px solid rgba(202,163,106,.35);
+  pointer-events:none;
+}
+.luxury-frame-corner2{
+  position:absolute;width:24px;height:24px;
+  opacity:.7;
+}
+.luxury-frame-corner2::before,.luxury-frame-corner2::after{
+  content:"";position:absolute;background:var(--gold);
+}
+.luxury-frame-corner2.tl{top:4px;left:4px}
+.luxury-frame-corner2.tl::before{width:24px;height:2px;top:0;left:0}
+.luxury-frame-corner2.tl::after{width:2px;height:24px;top:0;left:0}
+.luxury-frame-corner2.tr{top:4px;right:4px}
+.luxury-frame-corner2.tr::before{width:24px;height:2px;top:0;right:0}
+.luxury-frame-corner2.tr::after{width:2px;height:24px;top:0;right:0}
+.luxury-frame-corner2.bl{bottom:4px;left:4px}
+.luxury-frame-corner2.bl::before{width:24px;height:2px;bottom:0;left:0}
+.luxury-frame-corner2.bl::after{width:2px;height:24px;bottom:0;left:0}
+.luxury-frame-corner2.br{bottom:4px;right:4px}
+.luxury-frame-corner2.br::before{width:24px;height:2px;bottom:0;right:0}
+.luxury-frame-corner2.br::after{width:2px;height:24px;bottom:0;right:0}
+
+.luxury-frame img{
+  display:block;width:min(380px,65vw);aspect-ratio:4/5;object-fit:cover;
+  transition:transform 0.5s ease;
+}
+.luxury-frame:hover img{transform:scale(1.03)}
+
+.picture-click{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:14px 30px;border:1.5px solid var(--gold);border-radius:999px;
+  background:transparent;color:var(--wine);cursor:pointer;
+  font:500 17px "Cormorant Garamond";letter-spacing:.06em;
+  transition:all 0.3s ease;
+}
+.picture-click:hover{
+  background:var(--gold);color:#fff;
+  transform:translateY(-2px);
+  box-shadow:0 10px 30px rgba(202,163,106,.3);
+}
+
+/* ====================== */
+/* PAGE 5 - BIRTHDAY MSG  */
+/* ====================== */
+.bday-msg{
+  max-width:700px;margin:auto;
+}
+.bday-line1{
+  font:500 clamp(32px,5.5vw,56px) "Playfair Display";
+  color:#461c27;line-height:1.2;margin-bottom:24px;
+}
+.bday-line2{
+  font:400 clamp(22px,3.5vw,32px) "Cormorant Garamond";
+  color:var(--muted);line-height:1.5;font-style:italic;
+}
+.bday-hearts{
+  margin-top:30px;font-size:24px;color:var(--wine);letter-spacing:8px;
+}
+
+/* ====================== */
+/* PAGE 6 - OUR MOMENTS   */
+/* ====================== */
+.memory-heading{font:400 clamp(36px,6vw,60px) "Great Vibes";color:#481e29;margin:0}
+.memory-sub{font:16px "Cormorant Garamond";color:var(--muted);margin:4px 0 16px}
+.gallery-wrapper{
+  max-height:calc(100vh - 220px);overflow-y:auto;overflow-x:hidden;
+  padding:4px;-webkit-overflow-scrolling:touch;
+  scrollbar-width:thin;scrollbar-color:var(--rose) transparent;
+}
+.gallery-wrapper::-webkit-scrollbar{width:4px}
+.gallery-wrapper::-webkit-scrollbar-track{background:transparent}
+.gallery-wrapper::-webkit-scrollbar-thumb{background:var(--rose);border-radius:4px}
+.gallery{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:16px;
+  max-width:900px;margin:auto;align-items:start;
+}
+.memory{
+  background:linear-gradient(145deg,#fff,#f9f2e8);
+  padding:8px 8px 32px;
+  box-shadow:0 15px 30px #571c2c18,0 0 0 1px rgba(202,163,106,.12);
+  position:relative;transition:transform .4s cubic-bezier(.4,0,.2,1);
+  cursor:pointer;
+}
+.memory::before{
+  content:"";position:absolute;inset:4px;inset-block-end:28px;
+  border:1px solid rgba(202,163,106,.2);pointer-events:none;
+}
+.memory:nth-child(1){transform:rotate(-4deg)}
+.memory:nth-child(2){transform:rotate(3deg);margin-top:12px}
+.memory:nth-child(3){transform:rotate(-2deg);margin-top:8px}
+.memory:nth-child(4){transform:rotate(4deg)}
+.memory:nth-child(5){transform:rotate(-3deg)}
+.memory:nth-child(6){transform:rotate(2deg);margin-top:10px}
+.memory:nth-child(7){transform:rotate(-2deg)}
+.memory:nth-child(8){transform:rotate(5deg);margin-top:5px}
+.memory img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block}
+.memory span{
+  position:absolute;bottom:7px;left:0;right:0;
+  font:18px "Great Vibes";color:#4a3034;text-align:center;
+}
+.memory:hover{
+  transform:translateY(-8px) rotate(0deg) scale(1.04) !important;
+  box-shadow:0 25px 50px #571c2c28;
+  z-index:10;
+}
+
+/* ====================== */
+/* PAGE 7 - FINAL         */
+/* ====================== */
+.final-wrap{position:relative}
+.final-glow{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse at center,rgba(202,163,106,.08) 0%,transparent 70%);
+  pointer-events:none;
+  animation:final-pulse 4s ease-in-out infinite alternate;
+}
+@keyframes final-pulse{
+  0%{opacity:.4}100%{opacity:.8}
+}
+.final-photo{
+  width:min(320px,60vw);margin:0 auto 30px;
+  background:linear-gradient(145deg,#fff,#f9f2e8);
+  padding:12px 12px 50px;
+  box-shadow:var(--shadow),0 0 0 1px rgba(202,163,106,.15);
+  transform:rotate(-3deg);position:relative;
+  transition:transform 0.4s ease;
+}
+.final-photo:hover{transform:rotate(0deg)}
+.final-photo::before{
+  content:"";position:absolute;inset:6px;inset-block-end:44px;
+  border:1px solid rgba(202,163,106,.2);pointer-events:none;
+}
+.final-photo img{display:block;width:100%;aspect-ratio:4/5;object-fit:cover}
+.final-photo span{position:absolute;bottom:14px;left:0;right:0;font:25px "Great Vibes";color:#4b3034;text-align:center}
+.final-message{
+  font:400 clamp(24px,4vw,38px) "Cormorant Garamond";
+  color:#4a1e2a;line-height:1.5;max-width:650px;margin:0 auto;
+  font-style:italic;
+}
+.final-emoji{font-size:48px;margin-top:20px;display:inline-block}
+.heart-big{font-size:30px;color:var(--wine);margin-top:20px;letter-spacing:10px}
+
+/* Unlock animation overlay */
+.unlock-overlay{
+  position:fixed;inset:0;z-index:200;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(40,20,25,.5);backdrop-filter:blur(10px);
+  opacity:0;pointer-events:none;
+}
+.unlock-overlay.show{opacity:1;pointer-events:auto}
+.unlock-heart{
+  font-size:80px;color:var(--wine);
+}
+
+/* ====================== */
+/* RESPONSIVE             */
+/* ====================== */
+@media(max-width:760px){
+  .screen{padding:30px 16px 80px}
+  .pass-layout{grid-template-columns:1fr;gap:20px;text-align:center}
+  .pass-layout .premium-frame{width:140px;margin:0 auto}
+  .pass-layout .premium-frame-inner{padding:8px 8px 32px}
+  .frame-caption{font-size:16px;bottom:7px}
+  .dots,.keypad{justify-content:center}
+  .pass-copy p{font-size:16px;margin-bottom:12px}
+  .pass-copy h1{font-size:clamp(28px,7vw,42px)}
+  .key{width:48px;height:48px;font-size:16px}
+  .keypad{grid-template-columns:repeat(3,48px)}
+  .cinematic-card{padding:50px 24px;border-radius:20px}
+  .gallery{grid-template-columns:repeat(2,1fr);gap:10px}
+  .memory{padding:6px 6px 26px}
+  .memory:nth-child(n){margin-top:0 !important;transform:rotate(0deg) !important}
+  .memory:hover{transform:translateY(-4px) scale(1.02) !important}
+  .memory span{font-size:15px;bottom:5px}
+  .memory img{aspect-ratio:1/1}
+  .gallery-wrapper{max-height:calc(100vh - 180px)}
+  .next-hint{display:none}
+  .nav{bottom:8px}
+  .nav button{padding:9px 13px;font-size:13px}
+  .luxury-frame{padding:12px}
+  .luxury-frame img{width:min(300px,70vw)}
+  .final-photo{width:min(260px,65vw);padding:10px 10px 42px}
+  .final-message{font-size:clamp(20px,4.5vw,28px)}
+  .click-to-open{padding:14px 28px;font-size:16px}
+  .bday-line2{font-size:clamp(18px,3.5vw,26px)}
+  .counter{font-size:11px}
+}
+
+@media(max-width:380px){
+  .screen{padding:24px 12px 75px}
+  .pass-layout .premium-frame{width:120px}
+  .pass-copy h1{font-size:26px}
+  .hero-title{font-size:clamp(50px,14vw,80px)}
+  .hero-name{font-size:clamp(22px,5vw,32px)}
+  .gallery{gap:8px}
+  .memory{padding:4px 4px 22px}
+  .memory span{font-size:13px}
+  .memory img{aspect-ratio:1/1}
+  .final-photo{padding:8px 8px 36px}
+  .cinematic-card{padding:40px 18px}
+}
+</style>
+</head>
+
+<body>
+<div class="app" id="app">
+  <div class="grain"></div>
+  <div class="progress" id="progress"></div>
+  <div class="heart-field" id="heartField"></div>
+  <canvas id="particleCanvas"></canvas>
+
+  <div class="decor one">♡</div>
+  <div class="decor two">✦</div>
+  <div class="decor three">♡</div>
+  <div class="decor four">✧</div>
+
+  <!-- PAGE 1: PASSCODE -->
+  <section class="screen active" data-screen="0" id="screen0">
+    <div class="content pass-layout">
+      <div class="premium-frame">
+        <div class="premium-frame-inner">
+          <div class="premium-frame-tape"></div>
+          <div class="premium-frame-border"></div>
+          <div class="premium-frame-corner tl"></div>
+          <div class="premium-frame-corner tr"></div>
+          <div class="premium-frame-corner bl"></div>
+          <div class="premium-frame-corner br"></div>
+          <img id="coverImage" src="assets/WhatsApp Image 2026-10-02 at 2.04.23 PM.jpeg" alt="Cover">
+          <div class="frame-caption">for my favourite person ♡</div>
+        </div>
+      </div>
+      <div class="pass-copy" id="passCopy">
+        <div style="font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--wine);margin-bottom:12px">A little surprise</div>
+        <h1>Enter the secret code</h1>
+        <p>Only one person in the world gets to unlock this.</p>
+        <div class="dots" id="dots"></div>
+        <div class="keypad" id="keypad">
+          <button class="key" data-key="1">1</button><button class="key" data-key="2">2</button><button class="key" data-key="3">3</button>
+          <button class="key" data-key="4">4</button><button class="key" data-key="5">5</button><button class="key" data-key="6">6</button>
+          <button class="key" data-key="7">7</button><button class="key" data-key="8">8</button><button class="key" data-key="9">9</button>
+          <button class="key" data-key="*">*</button><button class="key" data-key="0">0</button><button class="key" data-key="#">#</button>
+        </div>
+        <div class="error" id="error"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 2: HAPPY BIRTHDAY -->
+  <section class="screen" data-screen="1" id="screen1">
+    <div class="content hero-content">
+      <div class="hero-kicker">made especially for you</div>
+      <h1 class="hero-title">Happy Birthday</h1>
+      <div class="hero-name">Jaan</div>
+      <div class="hero-line"></div>
+      <button class="click-to-open" id="clickToOpen1" onclick="goToPage(2)">
+        <span>Click to open</span>
+        <span class="heart-icon">♥</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- PAGE 3: MESSAGE -->
+  <section class="screen" data-screen="2" id="screen2">
+    <div class="content">
+      <div class="cinematic-card" id="cinematicCard">
+        <div class="cinematic-message" id="cinematicMsg">
+          Half of my heart is across miles but the whale of it belongs to You.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 4: PICTURE + CLICK TO OPEN -->
+  <section class="screen" data-screen="3" id="screen3">
+    <div class="content picture-page">
+      <div class="luxury-frame" id="luxuryFrame" onclick="goToPage(4)">
+        <div class="luxury-frame-glow"></div>
+        <div class="luxury-frame-outline"></div>
+        <div class="luxury-frame-corner2 tl"></div>
+        <div class="luxury-frame-corner2 tr"></div>
+        <div class="luxury-frame-corner2 bl"></div>
+        <div class="luxury-frame-corner2 br"></div>
+        <img src="assets/WhatsApp Image 2026-10-02 at 2.04.27 PM.jpeg" alt="Our moment">
+      </div>
+      <button class="picture-click" onclick="goToPage(4)">
+        <span>Click to open</span>
+        <span style="font-size:18px">♡</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- PAGE 5: BIRTHDAY MESSAGE -->
+  <section class="screen" data-screen="4" id="screen4">
+    <div class="content bday-msg">
+      <div class="bday-line1" id="bdayLine1">Happy birthday to my favorite person.</div>
+      <div class="bday-line2" id="bdayLine2">Counting down the days until i can kiss you instead of texting you.</div>
+      <div class="bday-hearts" id="bdayHearts">♥ ♥ ♥</div>
+    </div>
+  </section>
+
+  <!-- PAGE 6: OUR MOMENTS -->
+  <section class="screen" data-screen="5" id="screen5">
+    <div class="content">
+      <h2 class="memory-heading">Our Moments</h2>
+      <div class="memory-sub">moments i'd keep forever ♡</div>
+      <div class="gallery-wrapper">
+        <div class="gallery" id="gallery"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 7: FINAL MESSAGE -->
+  <section class="screen" data-screen="6" id="screen6">
+    <div class="content final-wrap">
+      <div class="final-glow"></div>
+      <div class="final-photo" id="finalPhoto">
+        <img src="assets/WhatsApp Image 2026-10-02 at 2.04.45 PM.jpeg" alt="Us">
+        <span>forever & always ♡</span>
+      </div>
+      <div class="final-message" id="finalMessage">
+        thank you for everything you gave me, now just smile for me plz like an insidious <span class="final-emoji">👻</span>
+      </div>
+      <div class="heart-big" id="heartBig">♥ ♥ ♥</div>
+    </div>
+  </section>
+
+  <div class="next-hint hidden" id="nextHint">Next →</div>
+  <div class="nav hidden" id="navBar">
+    <button id="prevBtn" onclick="prevScreen()">← Previous</button>
+    <div class="counter" id="counter">2 / 7</div>
+    <button id="nextBtn" onclick="nextScreen()">Next →</button>
+  </div>
+</div>
+
+<!-- Unlock overlay -->
+<div class="unlock-overlay" id="unlockOverlay">
+  <div class="unlock-heart" id="unlockHeart">♥</div>
+</div>
+
+<script>
+/* ==========================================================
+   CONFIGURATION
+   ========================================================== */
+const PASSCODE = "9920";
+
+const MEMORIES = [
+  { image:"assets/WhatsApp Image 2026-10-02 at 2.04.33 PM.jpeg", label:"little moments" },
+  { image:"assets/WhatsApp Image 2026-10-02 at 2.04.38 PM.jpeg", label:"just us" },
+  { image:"assets/WhatsApp Image 2026-10-02 at 2.04.42 PM.jpeg", label:"happy days" },
+  { image:"assets/WhatsApp Image 2026-10-02 at 2.04.43 PM.jpeg", label:"forever" },
+  { image:"assets/WhatsApp Image 2026-10-02 at 2.04.44 PM.jpeg", label:"us ♡" },
+  { image:"assets/WhatsApp Image 2026-10-02 at 2.04.47 PM.jpeg", label:"memories" },
+  { image:"assets/WhatsApp Image 2026-10-02 at 2.04.49 PM.jpeg", label:"together" },
+  { image:"assets/WhatsApp Image 2026-10-02 at 2.04.52 PM.jpeg", label:"always" }
+];
+
+/* ==========================================================
+   STATE
+   ========================================================== */
+const screens = [...document.querySelectorAll(".screen")];
+const TOTAL = screens.length; // 7
+let current = 0;
+let unlocked = false; // STRICT: must be false initially
+let entered = "";
+let animating = false;
+
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+
+/* ==========================================================
+   SETUP
+   ========================================================== */
+function setup() {
+  // Build gallery
+  const gallery = $("#gallery");
+  gallery.innerHTML = MEMORIES.map((m, i) => `
+    <div class="memory">
+      <img src="${m.image}" alt="Memory ${i+1}" loading="lazy">
+      <span>${m.label}</span>
+    </div>
+  `).join("");
+
+  // Build floating hearts
+  for (let i = 0; i < 20; i++) {
+    const h = document.createElement("span");
+    h.className = "float-heart";
+    h.textContent = ["♡","♥","✦","·"][i % 4];
+    h.style.left = Math.random() * 100 + "%";
+    h.style.animationDuration = (9 + Math.random() * 14) + "s";
+    h.style.animationDelay = (-Math.random() * 15) + "s";
+    h.style.fontSize = (10 + Math.random() * 14) + "px";
+    $("#heartField").appendChild(h);
+  }
+
+  renderDots();
+  updateUI();
+  initParticles();
+}
+
+/* ==========================================================
+   PASSCODE DOTS
+   ========================================================== */
+function renderDots() {
+  const dotsEl = $("#dots");
+  dotsEl.innerHTML = "";
+  for (let i = 0; i < PASSCODE.length; i++) {
+    const d = document.createElement("span");
+    d.className = "dot" + (i < entered.length ? " filled" : "");
+    dotsEl.appendChild(d);
+  }
+}
+
+/* ==========================================================
+   KEY PRESS
+   ========================================================== */
+function pressKey(k) {
+  if (unlocked) return;
+  if (entered.length >= PASSCODE.length) return;
+
+  entered += k;
+  renderDots();
+
+  // Animate the dot that just filled
+  const dots = $$(".dot");
+  const lastFilled = dots[entered.length - 1];
+  if (lastFilled) {
+    gsap.fromTo(lastFilled, {scale: 1.4}, {scale: 1, duration: 0.3, ease: "back.out(2)"});
+  }
+
+  if (entered.length === PASSCODE.length) {
+    setTimeout(() => {
+      if (entered === PASSCODE) {
+        correctPassword();
+      } else {
+        wrongPassword();
+      }
+    }, 200);
+  }
+}
+
+/* ==========================================================
+   WRONG PASSWORD
+   ========================================================== */
+function wrongPassword() {
+  $("#error").textContent = "That's not it, my love ♡ Try again.";
+  gsap.fromTo("#passCopy", {x: -10}, {x: 10, duration: 0.06, repeat: 7, yoyo: true, ease: "power1.inOut", onComplete: () => {
+    gsap.set("#passCopy", {x: 0});
+  }});
+
+  // Shake dots red briefly
+  gsap.to(".dot", {borderColor: "#d32f2f", duration: 0.2, yoyo: true, repeat: 1});
+
+  entered = "";
+  setTimeout(() => {
+    $("#error").textContent = "";
+    renderDots();
+  }, 1200);
+}
+
+/* ==========================================================
+   CORRECT PASSWORD — UNLOCK ANIMATION
+   ========================================================== */
+function correctPassword() {
+  unlocked = true;
+  $("#error").textContent = "";
+
+  // Animate dots success
+  gsap.to(".dot", {
+    background: "var(--gold)",
+    borderColor: "var(--gold)",
+    scale: 1.3,
+    stagger: 0.08,
+    duration: 0.3,
+    ease: "back.out(2)"
+  });
+
+  // Show unlock overlay
+  const overlay = $("#unlockOverlay");
+  overlay.classList.add("show");
+  gsap.fromTo("#unlockHeart", {scale: 0, rotation: -30}, {
+    scale: 1.5, rotation: 0, duration: 0.6, ease: "back.out(2)",
+    onComplete: () => {
+      // Heart burst particles
+      for (let i = 0; i < 18; i++) {
+        const p = document.createElement("div");
+        p.textContent = ["♥","♡","✦","✧","·"][i % 5];
+        p.style.position = "fixed";
+        p.style.left = "50%"; p.style.top = "50%";
+        p.style.zIndex = 201;
+        p.style.color = i % 3 === 0 ? "#caa36a" : i % 3 === 1 ? "#9c304d" : "#d9879b";
+        p.style.fontSize = (14 + Math.random() * 18) + "px";
+        p.style.pointerEvents = "none";
+        document.body.appendChild(p);
+        gsap.to(p, {
+          x: (Math.random() - 0.5) * 400,
+          y: (Math.random() - 0.5) * 350,
+          rotation: Math.random() * 400,
+          opacity: 0,
+          duration: 1 + Math.random() * 0.5,
+          ease: "power2.out",
+          onComplete: () => p.remove()
+        });
+      }
+      // Pulse and fade heart
+      gsap.to("#unlockHeart", {scale: 3, opacity: 0, duration: 0.8, delay: 0.3, ease: "power2.in"});
+      // Fade overlay and go to page 2
+      gsap.to(overlay, {opacity: 0, duration: 0.6, delay: 0.9, onComplete: () => {
+        overlay.classList.remove("show");
+        overlay.style.display = "none";
+        // Transition to page 2
+        goToPage(1);
+      }});
+    }
+  });
+}
+
+/* ==========================================================
+   NAVIGATION — STRICT PASSCODE ENFORCEMENT
+   ========================================================== */
+function goToPage(index) {
+  if (animating) return;
+  if (index < 0 || index >= TOTAL) return;
+  // STRICT: Cannot go past page 1 without unlock
+  if (index > 0 && !unlocked) return;
+  if (index === current) return;
+
+  animating = true;
+  const dir = index > current ? -1 : 1;
+
+  gsap.to(screens[current], {
+    opacity: 0, y: dir * -30, scale: 0.97,
+    duration: 0.35, ease: "power2.in",
+    onComplete: () => {
+      screens[current].classList.remove("active");
+      current = index;
+      updateUI();
+      animating = false;
+    }
+  });
+}
+
+function nextScreen() {
+  // STRICT: Cannot navigate away from passcode page without unlocking
+  if (current === 0 && !unlocked) return;
+  if (current >= TOTAL - 1) return;
+  goToPage(current + 1);
+}
+
+function prevScreen() {
+  // STRICT: Cannot go to page 0 from navigation (it's the lock screen)
+  // Also: prevent going below page 1 after unlock
+  if (current <= 1) return; // Don't allow going back to passcode page
+  goToPage(current - 1);
+}
+
+/* ==========================================================
+   UI UPDATE
+   ========================================================== */
+function updateUI() {
+  screens.forEach((s, i) => {
+    if (i === current) {
+      s.classList.add("active");
+      s.style.opacity = "0";
+      gsap.to(s, {opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "power2.out"});
+    } else {
+      s.classList.remove("active");
+    }
+  });
+
+  // Show/hide navigation
+  const nav = $("#navBar");
+  const hint = $("#nextHint");
+
+  if (current === 0) {
+    // Passcode page: NO navigation
+    nav.classList.add("hidden");
+    hint.classList.add("hidden");
+  } else {
+    nav.classList.remove("hidden");
+    hint.classList.remove("hidden");
+    $("#prevBtn").disabled = current <= 1; // Can't go back to passcode
+    $("#nextBtn").disabled = current === TOTAL - 1;
+    $("#counter").textContent = `${current + 1} / ${TOTAL}`;
+    $("#nextHint").textContent = current === TOTAL - 1 ? "The End ♡" : "Next →";
+  }
+
+  // Progress bar
+  $("#progress").style.width = (current / (TOTAL - 1) * 100) + "%";
+
+  // Animate current screen content
+  requestAnimationFrame(() => animateIn(current));
+}
+
+/* ==========================================================
+   SCREEN ANIMATIONS
+   ========================================================== */
+function animateIn(index) {
+  const s = screens[index];
+
+  // PAGE 1: Passcode
+  if (index === 0) {
+    gsap.fromTo(".premium-frame-inner", {y: 30, opacity: 0, rotation: -8}, {y: 0, opacity: 1, rotation: -2, duration: 0.8, ease: "power3.out"});
+    gsap.fromTo(".pass-copy > *", {y: 25, opacity: 0}, {y: 0, opacity: 1, stagger: 0.08, duration: 0.6, ease: "power3.out", delay: 0.2});
+  }
+
+  // PAGE 2: Happy Birthday
+  if (index === 1) {
+    const tl = gsap.timeline();
+    tl.fromTo(".hero-kicker", {y: 30, opacity: 0}, {y: 0, opacity: 1, duration: 0.6, ease: "power3.out"})
+      .fromTo(".hero-title", {y: 50, opacity: 0, scale: 0.85}, {y: 0, opacity: 1, scale: 1, duration: 1, ease: "power4.out"}, "-=0.3")
+      .fromTo(".hero-name", {y: 30, opacity: 0, letterSpacing: "0.3em"}, {y: 0, opacity: 1, letterSpacing: "0.12em", duration: 0.7, ease: "power3.out"}, "-=0.5")
+      .fromTo(".hero-line", {width: 0}, {width: 100, duration: 0.6, ease: "power2.out"}, "-=0.3")
+      .fromTo(".click-to-open", {y: 20, opacity: 0, scale: 0.9}, {y: 0, opacity: 1, scale: 1, duration: 0.6, ease: "back.out(1.6)"}, "-=0.2");
+  }
+
+  // PAGE 3: Cinematic Message
+  if (index === 2) {
+    const tl = gsap.timeline();
+    tl.fromTo(".cinematic-card", {scale: 0.9, opacity: 0, y: 40}, {scale: 1, opacity: 1, y: 0, duration: 0.8, ease: "power3.out"})
+      .fromTo(".cinematic-message", {y: 30, opacity: 0}, {y: 0, opacity: 1, duration: 0.8, ease: "power3.out"}, "-=0.4");
+
+    // Add floating elements inside the card
+    const card = $("#cinematicCard");
+    // Clear old floats
+    card.querySelectorAll(".cinematic-float").forEach(e => e.remove());
+    const symbols = ["♡","✦","♥","·","✧"];
+    for (let i = 0; i < 8; i++) {
+      const f = document.createElement("div");
+      f.className = "cinematic-float";
+      f.textContent = symbols[i % symbols.length];
+      f.style.left = (10 + Math.random() * 80) + "%";
+      f.style.top = (10 + Math.random() * 80) + "%";
+      f.style.fontSize = (14 + Math.random() * 18) + "px";
+      card.appendChild(f);
+      gsap.fromTo(f, {opacity: 0, y: 20}, {
+        opacity: 0.15, y: -20 - Math.random() * 30, duration: 2 + Math.random() * 2,
+        repeat: -1, yoyo: true, ease: "sine.inOut", delay: Math.random() * 1.5
+      });
+    }
+  }
+
+  // PAGE 4: Picture
+  if (index === 3) {
+    const tl = gsap.timeline();
+    tl.fromTo(".luxury-frame", {y: 50, opacity: 0, rotation: 8, scale: 0.85}, {y: 0, opacity: 1, rotation: -1.5, scale: 1, duration: 1, ease: "power3.out"})
+      .fromTo(".picture-click", {y: 20, opacity: 0}, {y: 0, opacity: 1, duration: 0.5, ease: "power3.out"}, "-=0.3");
+
+    // Subtle parallax on image
+    gsap.to(".luxury-frame img", {scale: 1.03, duration: 3, repeat: -1, yoyo: true, ease: "sine.inOut"});
+  }
+
+  // PAGE 5: Birthday Message
+  if (index === 4) {
+    const tl = gsap.timeline();
+    tl.fromTo("#bdayLine1", {y: 40, opacity: 0}, {y: 0, opacity: 1, duration: 0.8, ease: "power3.out"})
+      .fromTo("#bdayLine2", {y: 40, opacity: 0}, {y: 0, opacity: 1, duration: 0.8, ease: "power3.out"}, "-=0.3")
+      .fromTo("#bdayHearts", {scale: 0, opacity: 0}, {scale: 1, opacity: 1, duration: 0.6, ease: "back.out(2)"}, "-=0.2");
+
+    // Heartbeat animation
+    gsap.to("#bdayHearts", {scale: 1.15, duration: 0.8, repeat: -1, yoyo: true, ease: "sine.inOut", delay: 1.5});
+
+    // Spawn some hearts
+    spawnHeartParticles(s, 6);
+  }
+
+  // PAGE 6: Our Moments
+  if (index === 5) {
+    const memories = s.querySelectorAll(".memory");
+    gsap.fromTo(memories, {y: 60, opacity: 0, scale: 0.9}, {
+      y: 0, opacity: 1, scale: 1,
+      duration: 0.7, stagger: 0.1, ease: "back.out(1.3)"
+    });
+  }
+
+  // PAGE 7: Final
+  if (index === 6) {
+    const tl = gsap.timeline();
+    tl.fromTo(".final-photo", {y: 50, rotation: 8, opacity: 0, scale: 0.9}, {y: 0, rotation: -3, opacity: 1, scale: 1, duration: 1, ease: "power3.out"})
+      .fromTo(".final-message", {y: 35, opacity: 0}, {y: 0, opacity: 1, duration: 0.8, ease: "power3.out"}, "-=0.4")
+      .fromTo("#heartBig", {scale: 0, opacity: 0}, {scale: 1, opacity: 1, duration: 0.6, ease: "back.out(2)"}, "-=0.3");
+
+    // Heartbeat on hearts
+    gsap.to("#heartBig", {scale: 1.12, duration: 0.85, repeat: -1, yoyo: true, ease: "sine.inOut", delay: 1.2});
+
+    // Ghost emoji bounce
+    gsap.to(".final-emoji", {y: -8, duration: 1.2, repeat: -1, yoyo: true, ease: "sine.inOut"});
+
+    // Floating particles
+    spawnHeartParticles(s, 8);
+  }
+}
+
+/* ==========================================================
+   HEART PARTICLES HELPER
+   ========================================================== */
+function spawnHeartParticles(container, count) {
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement("div");
+    p.textContent = ["♥","♡","✦"][i % 3];
+    p.style.position = "absolute";
+    p.style.left = (10 + Math.random() * 80) + "%";
+    p.style.top = (20 + Math.random() * 60) + "%";
+    p.style.fontSize = (12 + Math.random() * 14) + "px";
+    p.style.color = i % 2 === 0 ? "var(--wine)" : "var(--gold)";
+    p.style.opacity = "0";
+    p.style.pointerEvents = "none";
+    p.style.zIndex = "1";
+    container.appendChild(p);
+    gsap.to(p, {
+      opacity: 0.2, y: -30 - Math.random() * 40,
+      duration: 2 + Math.random() * 2,
+      repeat: -1, yoyo: true,
+      ease: "sine.inOut", delay: Math.random() * 2,
+    });
+  }
+}
+
+/* ==========================================================
+   PARTICLE CANVAS (subtle background particles)
+   ========================================================== */
+function initParticles() {
+  const canvas = $("#particleCanvas");
+  const ctx = canvas.getContext("2d");
+  let particles = [];
+  const count = window.innerWidth < 500 ? 25 : 45;
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener("resize", resize);
+
+  for (let i = 0; i < count; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      size: 1 + Math.random() * 2,
+      speedX: (Math.random() - 0.5) * 0.3,
+      speedY: -0.2 - Math.random() * 0.4,
+      opacity: 0.05 + Math.random() * 0.12,
+    });
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+      p.x += p.speedX;
+      p.y += p.speedY;
+      if (p.y < -10) { p.y = canvas.height + 10; p.x = Math.random() * canvas.width; }
+      if (p.x < -10) p.x = canvas.width + 10;
+      if (p.x > canvas.width + 10) p.x = -10;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(113,29,50,${p.opacity})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(animate);
+  }
+  animate();
+}
+
+/* ==========================================================
+   KEYBOARD SUPPORT — STRICT PASSCODE ENFORCEMENT
+   ========================================================== */
+document.addEventListener("keydown", e => {
+  // On passcode page, allow digit entry
+  if (current === 0 && !unlocked && /^[0-9*#]$/.test(e.key)) {
+    pressKey(e.key);
+    return;
+  }
+
+  // STRICT: Block all navigation if not unlocked
+  if (!unlocked) {
+    if (e.key === "ArrowRight" || e.key === "ArrowLeft" || e.key === "Enter") {
+      e.preventDefault();
+    }
+    return;
+  }
+
+  // After unlock, allow navigation
+  if (e.key === "ArrowRight") nextScreen();
+  if (e.key === "ArrowLeft") prevScreen();
+});
+
+/* ==========================================================
+   KEYPAD CLICK HANDLERS
+   ========================================================== */
+document.querySelectorAll(".key").forEach(b => {
+  b.addEventListener("click", () => pressKey(b.dataset.key));
+});
+
+/* ==========================================================
+   TOUCH / SWIPE SUPPORT
+   ========================================================== */
+let touchStartX = 0;
+let touchStartY = 0;
+document.addEventListener("touchstart", e => {
+  touchStartX = e.changedTouches[0].clientX;
+  touchStartY = e.changedTouches[0].clientY;
+}, {passive: true});
+
+document.addEventListener("touchend", e => {
+  if (!unlocked) return; // STRICT: No swipe nav without unlock
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  const dy = e.changedTouches[0].clientY - touchStartY;
+  if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 60) {
+    if (dx < 0) nextScreen();
+    else prevScreen();
+  }
+}, {passive: true});
+
+/* ==========================================================
+   PREVENT PAGE REFRESH BYPASS
+   On load, always start locked on page 1.
+   ========================================================== */
+current = 0;
+unlocked = false;
+entered = "";
+
+/* Initialize */
+setup();
+</script>
+</body>
+</html>
